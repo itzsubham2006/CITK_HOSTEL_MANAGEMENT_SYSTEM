@@ -33,15 +33,6 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  let user = null
-  try {
-    const { data } = await supabase.auth.getUser()
-    user = data?.user || null
-  } catch (err) {
-    console.error('Error in middleware auth check:', err)
-    user = null
-  }
-
   const path = request.nextUrl.pathname
   const search = request.nextUrl.search
 
@@ -74,7 +65,33 @@ export async function updateSession(request: NextRequest) {
     path === '/warden' ||
     path.startsWith('/warden/')
 
-  // 1. If not logged in and accessing any gated route: redirect to login with return-to parameter
+  // Performance optimization: Check if client has any Supabase auth cookies
+  const allCookies = request.cookies.getAll()
+  const hasAuthCookie = allCookies.some((c) => c.name.startsWith('sb-'))
+
+  // 1. If no auth cookie at all:
+  // - For gated routes: redirect to login immediately in ~0ms (no remote network call)
+  // - For public routes: pass through immediately in ~0ms (no remote network call)
+  if (!hasAuthCookie) {
+    if (isGatedRoute) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      url.search = `?redirect=${encodeURIComponent(path + search)}`
+      return NextResponse.redirect(url)
+    }
+    return supabaseResponse
+  }
+
+  let user = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data?.user || null
+  } catch (err) {
+    console.error('Error in middleware auth check:', err)
+    user = null
+  }
+
+  // If auth cookie was stale or invalid and accessing a gated route
   if (!user && isGatedRoute) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'

@@ -73,6 +73,10 @@ export default async function WardenDashboardPage({
 
       {/* Quick Nav Bar */}
       <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', marginBottom: '25px' }}>
+        <Link href="/notifications" style={{ padding: '8px 16px', background: '#e8f5e9', color: '#2e7d32', border: '1px solid #c8e6c9', textDecoration: 'none', borderRadius: '6px', fontSize: '14px', fontWeight: 600 }}>
+          <i className="fa-solid fa-bell" style={{ marginRight: '6px' }}></i>
+          Notifications
+        </Link>
         <Link href="/hostel-rooms" style={{ padding: '8px 16px', background: '#2e7d32', color: '#fff', textDecoration: 'none', borderRadius: '6px', fontSize: '14px', fontWeight: 600 }}>
           Manage Hostel Rooms
         </Link>

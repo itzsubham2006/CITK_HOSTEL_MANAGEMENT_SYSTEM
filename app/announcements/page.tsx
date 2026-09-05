@@ -20,23 +20,27 @@ export default function AnnouncementsPage() {
   const loadData = async () => {
     setLoading(true)
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
+      const [announcementsRes, authRes] = await Promise.all([
+        supabase
+          .from('announcements')
+          .select('*')
+          .order('is_pinned', { ascending: false })
+          .order('created_at', { ascending: false }),
+        supabase.auth.getUser(),
+      ])
 
+      if (announcementsRes.error) throw announcementsRes.error
+      setAnnouncements(announcementsRes.data || [])
+
+      const user = authRes.data?.user
       if (user) {
-        const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .maybeSingle()
         setUserProfile(profile)
       }
-
-      const { data, error } = await supabase
-        .from('announcements')
-        .select('*')
-        .order('is_pinned', { ascending: false })
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      setAnnouncements(data || [])
     } catch (err) {
       console.error('Failed to load announcements:', err)
     } finally {
@@ -45,11 +49,15 @@ export default function AnnouncementsPage() {
   }
 
   useEffect(() => {
+    let isCancelled = false
+    let channel: ReturnType<typeof supabase.channel> | null = null
+
     loadData()
 
-    // Subscribe to real-time changes on announcements table
-    const channel = supabase
-      .channel('realtime_announcements_channel')
+    // Subscribe to real-time changes on announcements table with unique channel name
+    const channelName = `announcements_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
+    channel = supabase
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
@@ -58,13 +66,18 @@ export default function AnnouncementsPage() {
           table: 'announcements',
         },
         () => {
-          loadData()
+          if (!isCancelled) {
+            loadData()
+          }
         }
       )
       .subscribe()
 
     return () => {
-      supabase.removeChannel(channel)
+      isCancelled = true
+      if (channel) {
+        supabase.removeChannel(channel)
+      }
     }
   }, [])
 
@@ -76,24 +89,30 @@ export default function AnnouncementsPage() {
     setSubmitting(true)
 
     try {
-      const { error } = await supabase.from('announcements').insert({
-        title,
-        message,
-        hostel: (hostel ? hostel : null) as HostelName | null,
-        is_pinned: isPinned,
-        author_id: userProfile?.id || null,
+      const res = await fetch('/api/announcements', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: title.trim(),
+          message: message.trim(),
+          hostel: hostel && hostel !== 'None' && hostel !== '' ? hostel : null,
+          is_pinned: isPinned,
+        }),
       })
 
-      if (error) throw error
+      const data = await res.json()
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to publish announcement.')
+      }
 
       setTitle('')
       setMessage('')
       setHostel('')
       setIsPinned(false)
       loadData()
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Failed to publish announcement:', err)
-      alert('Could not publish announcement.')
+      alert(err instanceof Error ? err.message : 'Could not publish announcement.')
     } finally {
       setSubmitting(false)
     }

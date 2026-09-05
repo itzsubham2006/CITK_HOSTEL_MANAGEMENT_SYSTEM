@@ -3,6 +3,7 @@ import './globals.css'
 import Header from '@/components/header'
 import Footer from '@/components/footer'
 import BackToTop from '@/components/back-to-top'
+import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { HostelName, UserRole } from '@/types/database.types'
 
@@ -16,15 +17,19 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const cookieStore = await cookies()
+  const hasAuthCookie = cookieStore.getAll().some((c) => c.name.startsWith('sb-'))
 
   let profile = null
   let notificationCount = 0
 
-  if (user) {
+  if (hasAuthCookie) {
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (user) {
     try {
       const [{ data: userProfile }, { count }] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', user.id).maybeSingle(),
@@ -62,6 +67,7 @@ export default async function RootLayout({
         profile_pic_url: null,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
+      }
       }
     }
   }

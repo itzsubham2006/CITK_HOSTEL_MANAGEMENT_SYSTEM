@@ -38,6 +38,9 @@ export default function Header({ userProfile, notificationCount = 0 }: HeaderPro
   useEffect(() => {
     if (!userProfile?.id) return
 
+    let isCancelled = false
+    let channel: ReturnType<typeof supabase.channel> | null = null
+
     const refreshCount = async () => {
       try {
         const { count } = await supabase
@@ -45,7 +48,7 @@ export default function Header({ userProfile, notificationCount = 0 }: HeaderPro
           .select('*', { count: 'exact', head: true })
           .eq('user_id', userProfile.id)
           .eq('is_read', false)
-        if (typeof count === 'number') {
+        if (typeof count === 'number' && !isCancelled) {
           setUnreadCount(count)
         }
       } catch (err) {
@@ -55,8 +58,9 @@ export default function Header({ userProfile, notificationCount = 0 }: HeaderPro
 
     refreshCount()
 
-    const channel = supabase
-      .channel(`header_notifications_${userProfile.id}`)
+    const channelName = `header_notifs_${userProfile.id}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
+    channel = supabase
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
@@ -66,13 +70,18 @@ export default function Header({ userProfile, notificationCount = 0 }: HeaderPro
           filter: `user_id=eq.${userProfile.id}`,
         },
         () => {
-          refreshCount()
+          if (!isCancelled) {
+            refreshCount()
+          }
         }
       )
       .subscribe()
 
     return () => {
-      supabase.removeChannel(channel)
+      isCancelled = true
+      if (channel) {
+        supabase.removeChannel(channel)
+      }
     }
   }, [userProfile?.id, supabase])
 
@@ -157,6 +166,25 @@ export default function Header({ userProfile, notificationCount = 0 }: HeaderPro
                     <span>Dashboard</span>
                   </Link>
                 )}
+                <Link href="/notifications" style={{ display: 'flex', alignItems: 'center', gap: '5px', position: 'relative' }}>
+                  <i className="fa-solid fa-bell"></i>
+                  <span>Notifications</span>
+                  {unreadCount > 0 && (
+                    <span
+                      style={{
+                        background: '#dc2626',
+                        color: '#fff',
+                        fontSize: '10px',
+                        fontWeight: 700,
+                        borderRadius: '9999px',
+                        padding: '1px 5px',
+                        lineHeight: '1.2',
+                      }}
+                    >
+                      {unreadCount}
+                    </span>
+                  )}
+                </Link>
                 <Link href="/profile">
                   <i className="fa-solid fa-user"></i>
                   <span>Profile ({userProfile.username})</span>

@@ -33,6 +33,9 @@ export default function Navbar({ userProfile, unreadNotificationsCount = 0 }: Na
   useEffect(() => {
     if (!userProfile?.id) return
 
+    let isCancelled = false
+    let channel: ReturnType<typeof supabase.channel> | null = null
+
     const refreshCount = async () => {
       try {
         const { count } = await supabase
@@ -40,7 +43,7 @@ export default function Navbar({ userProfile, unreadNotificationsCount = 0 }: Na
           .select('*', { count: 'exact', head: true })
           .eq('user_id', userProfile.id)
           .eq('is_read', false)
-        if (typeof count === 'number') {
+        if (typeof count === 'number' && !isCancelled) {
           setUnreadCount(count)
         }
       } catch (err) {
@@ -50,8 +53,9 @@ export default function Navbar({ userProfile, unreadNotificationsCount = 0 }: Na
 
     refreshCount()
 
-    const channel = supabase
-      .channel(`navbar_notifications_${userProfile.id}`)
+    const channelName = `navbar_notifs_${userProfile.id}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
+    channel = supabase
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
@@ -61,13 +65,18 @@ export default function Navbar({ userProfile, unreadNotificationsCount = 0 }: Na
           filter: `user_id=eq.${userProfile.id}`,
         },
         () => {
-          refreshCount()
+          if (!isCancelled) {
+            refreshCount()
+          }
         }
       )
       .subscribe()
 
     return () => {
-      supabase.removeChannel(channel)
+      isCancelled = true
+      if (channel) {
+        supabase.removeChannel(channel)
+      }
     }
   }, [userProfile?.id, supabase])
 

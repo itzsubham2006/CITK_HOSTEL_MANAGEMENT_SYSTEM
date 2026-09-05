@@ -148,6 +148,20 @@ export default async function AdminDashboardPage() {
           </p>
           <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '10px' }}>
             <Link
+              href="/notifications"
+              style={{
+                padding: '6px 12px',
+                background: '#e8f5e9',
+                color: '#2e7d32',
+                textDecoration: 'none',
+                borderRadius: '6px',
+                fontWeight: 600,
+                fontSize: '13px',
+              }}
+            >
+              <i className="fa-solid fa-bell" style={{ marginRight: '4px' }}></i> Notifications
+            </Link>
+            <Link
               href="/announcements"
               style={{
                 padding: '6px 12px',
