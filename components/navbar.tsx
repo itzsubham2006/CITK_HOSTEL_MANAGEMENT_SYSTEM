@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Bell, LogOut, User, Menu, X, ShieldAlert, Sparkles, Building2 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { UserRole, HostelName } from '@/types/database.types'
 
@@ -23,7 +23,53 @@ interface NavbarProps {
 export default function Navbar({ userProfile, unreadNotificationsCount = 0 }: NavbarProps) {
   const router = useRouter()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(unreadNotificationsCount)
   const supabase = createClient()
+
+  useEffect(() => {
+    setUnreadCount(unreadNotificationsCount)
+  }, [unreadNotificationsCount])
+
+  useEffect(() => {
+    if (!userProfile?.id) return
+
+    const refreshCount = async () => {
+      try {
+        const { count } = await supabase
+          .from('notifications')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', userProfile.id)
+          .eq('is_read', false)
+        if (typeof count === 'number') {
+          setUnreadCount(count)
+        }
+      } catch (err) {
+        console.error('Error refreshing navbar notifications count:', err)
+      }
+    }
+
+    refreshCount()
+
+    const channel = supabase
+      .channel(`navbar_notifications_${userProfile.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${userProfile.id}`,
+        },
+        () => {
+          refreshCount()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [userProfile?.id, supabase])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -76,9 +122,9 @@ export default function Navbar({ userProfile, unreadNotificationsCount = 0 }: Na
             title="Notifications"
           >
             <Bell className="h-5 w-5" />
-            {unreadNotificationsCount > 0 && (
+            {unreadCount > 0 && (
               <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white ring-2 ring-white dark:ring-zinc-950">
-                {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
+                {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}
           </Link>

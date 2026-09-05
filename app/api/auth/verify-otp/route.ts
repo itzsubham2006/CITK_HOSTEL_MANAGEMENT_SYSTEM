@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import crypto from 'crypto'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { HostelName, UserRole } from '@/types/database.types'
 
@@ -18,13 +19,13 @@ export async function POST(req: Request) {
     const cleanOtp = otp.trim()
     const supabaseAdmin = createAdminClient()
 
-    // 1. Verify OTP in otp_verifications table
+    // 1. Verify OTP in cit_otp_requests table
     const { data: otpRecords, error: fetchOtpError } = await supabaseAdmin
-      .from('otp_verifications')
+      .from('cit_otp_requests')
       .select('*')
       .eq('email', cleanEmail)
-      .eq('verified', false)
-      .order('created_at', { ascending: false })
+      .is('verified_at', null)
+      .order('requested_at', { ascending: false })
       .limit(1)
 
     if (fetchOtpError || !otpRecords || otpRecords.length === 0) {
@@ -36,10 +37,10 @@ export async function POST(req: Request) {
 
     const activeOtp = otpRecords[0]
 
-    // Check if code matches
-    if (activeOtp.otp_code !== cleanOtp) {
+    // Check attempts limit (e.g. maximum 5 attempts)
+    if (activeOtp.attempts >= 5) {
       return NextResponse.json(
-        { error: 'Incorrect verification code. Please check and try again.' },
+        { error: 'Too many failed verification attempts. Please request a new code.' },
         { status: 400 }
       )
     }
@@ -52,10 +53,33 @@ export async function POST(req: Request) {
       )
     }
 
-    // 2. Mark OTP as verified
+    // Hash input code with sha256 to compare with otp_hash
+    const hashedInputOtp = crypto.createHash('sha256').update(cleanOtp).digest('hex')
+
+    // Check if code matches
+    if (activeOtp.otp_hash !== hashedInputOtp) {
+      const nextAttempts = activeOtp.attempts + 1
+      await supabaseAdmin
+        .from('cit_otp_requests')
+        .update({ attempts: nextAttempts })
+        .eq('id', activeOtp.id)
+
+      const remainingAttempts = Math.max(0, 5 - nextAttempts)
+      const hint =
+        remainingAttempts > 0
+          ? ` (${remainingAttempts} attempt${remainingAttempts === 1 ? '' : 's'} remaining)`
+          : ' (Maximum attempts reached. Please request a new code)'
+
+      return NextResponse.json(
+        { error: `Incorrect verification code. Please check and try again.${hint}` },
+        { status: 400 }
+      )
+    }
+
+    // 2. Mark OTP as verified with timestamp
     await supabaseAdmin
-      .from('otp_verifications')
-      .update({ verified: true })
+      .from('cit_otp_requests')
+      .update({ verified_at: new Date().toISOString() })
       .eq('id', activeOtp.id)
 
     // 3. Determine role based on allowlists and domain restriction
@@ -174,8 +198,13 @@ export async function POST(req: Request) {
       finalUserId = authUser.user.id
     }
 
-    // 5. Ensure profile is upserted with assigned role
+    // 5. Ensure profile is upserted with assigned role and associate user_id with cit_otp_requests
     if (finalUserId) {
+      await supabaseAdmin
+        .from('cit_otp_requests')
+        .update({ user_id: finalUserId })
+        .eq('id', activeOtp.id)
+
       const { error: profileError } = await supabaseAdmin.from('profiles').upsert({
         id: finalUserId,
         username: name,

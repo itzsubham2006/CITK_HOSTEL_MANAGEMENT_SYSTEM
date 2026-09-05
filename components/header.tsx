@@ -27,7 +27,54 @@ export default function Header({ userProfile, notificationCount = 0 }: HeaderPro
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [openMega, setOpenMega] = useState<string | null>(null)
   const [typingText, setTypingText] = useState('')
+  const [unreadCount, setUnreadCount] = useState(notificationCount)
   const supabase = createClient()
+
+  useEffect(() => {
+    setUnreadCount(notificationCount)
+  }, [notificationCount])
+
+  // Real-time notification sync
+  useEffect(() => {
+    if (!userProfile?.id) return
+
+    const refreshCount = async () => {
+      try {
+        const { count } = await supabase
+          .from('notifications')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', userProfile.id)
+          .eq('is_read', false)
+        if (typeof count === 'number') {
+          setUnreadCount(count)
+        }
+      } catch (err) {
+        console.error('Error refreshing notifications count:', err)
+      }
+    }
+
+    refreshCount()
+
+    const channel = supabase
+      .channel(`header_notifications_${userProfile.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${userProfile.id}`,
+        },
+        () => {
+          refreshCount()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [userProfile?.id, supabase])
 
   // Typing effect from original script
   useEffect(() => {
@@ -361,7 +408,7 @@ export default function Header({ userProfile, notificationCount = 0 }: HeaderPro
 
           <li>
             <Link href={userProfile ? "/notifications" : "/login?redirect=/notifications"} className="sp-badge-link" onClick={closeAllMenus}>
-              Notifications {notificationCount > 0 && <span className="sp-badge">{notificationCount}</span>}
+              Notifications {unreadCount > 0 && <span className="sp-badge">{unreadCount}</span>}
             </Link>
           </li>
 

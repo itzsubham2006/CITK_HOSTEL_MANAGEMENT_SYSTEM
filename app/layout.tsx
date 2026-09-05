@@ -26,11 +26,14 @@ export default async function RootLayout({
 
   if (user) {
     try {
-      const { data: userProfile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .maybeSingle()
+      const [{ data: userProfile }, { count }] = await Promise.all([
+        supabase.from('profiles').select('*').eq('id', user.id).maybeSingle(),
+        supabase
+          .from('notifications')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .eq('is_read', false),
+      ])
 
       // If profile exists use it, otherwise synthesize from auth metadata so header knows user is logged in
       profile = userProfile || {
@@ -44,12 +47,6 @@ export default async function RootLayout({
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }
-
-      const { count } = await supabase
-        .from('notifications')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .eq('is_read', false)
 
       notificationCount = count || 0
     } catch (err) {
@@ -72,6 +69,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <head>
+        <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossOrigin="anonymous" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
       </head>
       <body>

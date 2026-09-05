@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import crypto from 'crypto'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendOtpEmail } from '@/lib/email'
 
@@ -61,11 +62,11 @@ export async function POST(req: Request) {
     // 3. Rate limiting: enforce 60-second cooldown between resends
     const oneMinuteAgo = new Date(Date.now() - 60 * 1000).toISOString()
     const { data: recentOtp } = await supabaseAdmin
-      .from('otp_verifications')
+      .from('cit_otp_requests')
       .select('id')
       .eq('email', cleanEmail)
-      .gt('created_at', oneMinuteAgo)
-      .order('created_at', { ascending: false })
+      .gt('requested_at', oneMinuteAgo)
+      .order('requested_at', { ascending: false })
       .limit(1)
 
     if (recentOtp && recentOtp.length > 0) {
@@ -79,14 +80,18 @@ export async function POST(req: Request) {
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString()
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString()
 
-    // 5. Store OTP record in database
+    // 5. Hash OTP and store record in cit_otp_requests table
+    const otpHash = crypto.createHash('sha256').update(otpCode).digest('hex')
+
     const { error: dbError } = await supabaseAdmin
-      .from('otp_verifications')
+      .from('cit_otp_requests')
       .insert({
         email: cleanEmail,
-        otp_code: otpCode,
+        otp_hash: otpHash,
         expires_at: expiresAt,
-        verified: false,
+        attempts: 0,
+        requested_at: new Date().toISOString(),
+        verified_at: null,
       })
 
     if (dbError) {

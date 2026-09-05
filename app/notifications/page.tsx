@@ -22,6 +22,14 @@ export default function NotificationPage() {
         return
       }
 
+      // Fetch active announcements to verify announcement notifications are valid
+      const { data: activeAnnouncements } = await supabase
+        .from('announcements')
+        .select('id, title')
+
+      const activeAnnounceIds = new Set((activeAnnouncements || []).map((a) => a.id))
+      const activeAnnounceTitles = (activeAnnouncements || []).map((a) => a.title.toLowerCase())
+
       const { data, error } = await supabase
         .from('notifications')
         .select('*')
@@ -29,7 +37,39 @@ export default function NotificationPage() {
         .order('created_at', { ascending: false })
 
       if (error) throw error
-      setNotifications(data || [])
+
+      const validNotifications: any[] = []
+      const orphanedIdsToDelete: number[] = []
+
+      for (const n of data || []) {
+        if (n.link === '/announcements') {
+          // If linked to an announcement, check if the announcement still exists
+          if (n.announcement_id && !activeAnnounceIds.has(n.announcement_id)) {
+            orphanedIdsToDelete.push(n.id)
+            continue
+          }
+          // Legacy check if announcement_id wasn't saved yet
+          if (!n.announcement_id) {
+            const matchesActive = activeAnnounceTitles.some((t) =>
+              n.message.toLowerCase().includes(t)
+            )
+            if (!matchesActive) {
+              orphanedIdsToDelete.push(n.id)
+              continue
+            }
+          }
+        }
+        validNotifications.push(n)
+      }
+
+      setNotifications(validNotifications)
+
+      // Clean up orphaned notifications from database asynchronously
+      if (orphanedIdsToDelete.length > 0) {
+        Promise.resolve(
+          supabase.from('notifications').delete().in('id', orphanedIdsToDelete)
+        ).catch((err: unknown) => console.error('Cleanup orphaned error:', err))
+      }
     } catch (err) {
       console.error('Failed to load notifications:', err)
     } finally {
@@ -39,6 +79,33 @@ export default function NotificationPage() {
 
   useEffect(() => {
     loadNotifications()
+
+    let channel: any
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return
+      // Subscribe to real-time notification changes for this user
+      channel = supabase
+        .channel(`realtime_notifications_${user.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'notifications',
+            filter: `user_id=eq.${user.id}`,
+          },
+          () => {
+            loadNotifications()
+          }
+        )
+        .subscribe()
+    })
+
+    return () => {
+      if (channel) {
+        supabase.removeChannel(channel)
+      }
+    }
   }, [])
 
   const handleDelete = async (id: number) => {

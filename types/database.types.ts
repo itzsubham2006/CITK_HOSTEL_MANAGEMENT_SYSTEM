@@ -197,6 +197,7 @@ export interface Database {
           user_id: string
           message: string
           link: string | null
+          announcement_id: number | null
           is_read: boolean
           created_at: string
         }
@@ -205,6 +206,7 @@ export interface Database {
           user_id: string
           message: string
           link?: string | null
+          announcement_id?: number | null
           is_read?: boolean
           created_at?: string
         }
@@ -213,6 +215,7 @@ export interface Database {
           user_id?: string
           message?: string
           link?: string | null
+          announcement_id?: number | null
           is_read?: boolean
           created_at?: string
         }
@@ -222,6 +225,13 @@ export interface Database {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_announcement_id_fkey"
+            columns: ["announcement_id"]
+            isOneToOne: false
+            referencedRelation: "announcements"
             referencedColumns: ["id"]
           }
         ]
@@ -404,32 +414,46 @@ export interface Database {
         }
         Relationships: []
       }
-      otp_verifications: {
+      cit_otp_requests: {
         Row: {
-          id: number
+          id: string
+          user_id: string | null
           email: string
-          otp_code: string
+          otp_hash: string
           expires_at: string
-          verified: boolean
-          created_at: string
+          attempts: number
+          requested_at: string
+          verified_at: string | null
         }
         Insert: {
-          id?: number
+          id?: string
+          user_id?: string | null
           email: string
-          otp_code: string
+          otp_hash: string
           expires_at: string
-          verified?: boolean
-          created_at?: string
+          attempts?: number
+          requested_at?: string
+          verified_at?: string | null
         }
         Update: {
-          id?: number
+          id?: string
+          user_id?: string | null
           email?: string
-          otp_code?: string
+          otp_hash?: string
           expires_at?: string
-          verified?: boolean
-          created_at?: string
+          attempts?: number
+          requested_at?: string
+          verified_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "cit_otp_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       admin_emails: {
         Row: {

@@ -67,9 +67,12 @@ export async function updateSession(request: NextRequest) {
     path.startsWith('/hostel-rooms/') ||
     path === '/hostel-selector' ||
     path.startsWith('/hostel-selector/') ||
-    path.startsWith('/student') ||
-    path.startsWith('/admin') ||
-    path.startsWith('/warden')
+    path === '/student' ||
+    path.startsWith('/student/') ||
+    path === '/admin' ||
+    path.startsWith('/admin/') ||
+    path === '/warden' ||
+    path.startsWith('/warden/')
 
   // 1. If not logged in and accessing any gated route: redirect to login with return-to parameter
   if (!user && isGatedRoute) {
@@ -79,15 +82,22 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // 2. If logged in and accessing login or signup: redirect to role-based dashboard or return-to URL
-  if (user && (path === '/login' || path === '/signup' || path === '/register')) {
+  // Fast helper to get role from user_metadata before falling back to remote DB query
+  const getUserRole = async (): Promise<string> => {
+    if (user?.user_metadata?.role) {
+      return user.user_metadata.role as string
+    }
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
-      .eq('id', user.id)
+      .eq('id', user!.id)
       .maybeSingle()
+    return profile?.role || 'student'
+  }
 
-    const role = profile?.role || 'student'
+  // 2. If logged in and accessing login or signup: redirect to role-based dashboard or return-to URL
+  if (user && (path === '/login' || path === '/signup' || path === '/register')) {
+    const role = await getUserRole()
     const redirectUrl = request.nextUrl.clone()
 
     const destination = request.nextUrl.searchParams.get('redirect')
@@ -107,30 +117,22 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(redirectUrl)
   }
 
-  // 3. Server-side role check for admin routes
-  if (user && path.startsWith('/admin')) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .maybeSingle()
+  // 3. Server-side role check for admin routes (matches /admin and /admin/*, NOT other prefixes)
+  if (user && (path === '/admin' || path.startsWith('/admin/'))) {
+    const role = await getUserRole()
 
-    if (profile?.role !== 'admin') {
+    if (role !== 'admin') {
       const url = request.nextUrl.clone()
       url.pathname = '/'
       return NextResponse.redirect(url)
     }
   }
 
-  // 4. Server-side role check for warden routes
-  if (user && path.startsWith('/warden')) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .maybeSingle()
+  // 4. Server-side role check for warden management routes (matches /warden and /warden/*, NOT /wardens)
+  if (user && (path === '/warden' || path.startsWith('/warden/'))) {
+    const role = await getUserRole()
 
-    if (profile?.role !== 'warden' && profile?.role !== 'admin') {
+    if (role !== 'warden' && role !== 'admin') {
       const url = request.nextUrl.clone()
       url.pathname = '/'
       return NextResponse.redirect(url)
@@ -145,15 +147,11 @@ export async function updateSession(request: NextRequest) {
       path === '/hostel-selector' ||
       path.startsWith('/hostel-selector/'))
   ) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .maybeSingle()
+    const role = await getUserRole()
 
-    if (profile?.role !== 'warden' && profile?.role !== 'admin') {
+    if (role !== 'admin' && role !== 'warden') {
       const url = request.nextUrl.clone()
-      url.pathname = '/student/dashboard'
+      url.pathname = '/'
       return NextResponse.redirect(url)
     }
   }

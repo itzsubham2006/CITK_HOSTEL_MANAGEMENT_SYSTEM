@@ -60,34 +60,31 @@ export default function HostelDiariesPage() {
     setUploading(true)
 
     try {
-      const fileExt = imageFile.name.split('.').pop()
-      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`
-      const filePath = `${userProfile.id}/${fileName}`
+      const formData = new FormData()
+      formData.append('image', imageFile)
+      formData.append('caption', caption.trim())
 
-      const { error: uploadError } = await supabase.storage
-        .from('diary-images')
-        .upload(filePath, imageFile)
-
-      if (uploadError) throw uploadError
-
-      const { data: publicUrlData } = supabase.storage
-        .from('diary-images')
-        .getPublicUrl(filePath)
-
-      const { error: insertError } = await supabase.from('hostel_diaries').insert({
-        user_id: userProfile.id,
-        image_url: publicUrlData.publicUrl,
-        caption: caption.trim(),
+      const res = await fetch('/api/diaries/upload', {
+        method: 'POST',
+        body: formData,
       })
 
-      if (insertError) throw insertError
+      const result = await res.json()
+
+      if (!res.ok) {
+        throw new Error(result.error || 'Failed to upload photo.')
+      }
 
       setCaption('')
       setImageFile(null)
+      // Reset file input value
+      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
+      if (fileInput) fileInput.value = ''
+
       loadDiaries()
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Upload error:', err)
-      alert('Failed to upload photo.')
+      alert(err instanceof Error ? err.message : 'Failed to upload photo.')
     } finally {
       setUploading(false)
     }

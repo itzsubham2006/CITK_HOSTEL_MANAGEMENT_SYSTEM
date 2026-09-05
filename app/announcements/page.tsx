@@ -46,6 +46,26 @@ export default function AnnouncementsPage() {
 
   useEffect(() => {
     loadData()
+
+    // Subscribe to real-time changes on announcements table
+    const channel = supabase
+      .channel('realtime_announcements_channel')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'announcements',
+        },
+        () => {
+          loadData()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [])
 
   const isAdmin = userProfile?.role === 'admin' || userProfile?.role === 'warden'
@@ -82,12 +102,17 @@ export default function AnnouncementsPage() {
   const handleDelete = async (id: number) => {
     if (!confirm('Are you sure you want to delete this announcement?')) return
     try {
-      const { error } = await supabase.from('announcements').delete().eq('id', id)
-      if (error) throw error
-      setAnnouncements(announcements.filter((a) => a.id !== id))
+      // Delete via API route to ensure server-side notification cascade cleanup
+      const res = await fetch(`/api/announcements/${id}`, { method: 'DELETE' })
+      if (!res.ok) {
+        // Fallback to client-side supabase delete
+        const { error } = await supabase.from('announcements').delete().eq('id', id)
+        if (error) throw error
+      }
+      setAnnouncements((prev) => prev.filter((a) => a.id !== id))
     } catch (err) {
       console.error('Failed to delete announcement:', err)
-      alert('Could not delete.')
+      alert('Could not delete announcement.')
     }
   }
 

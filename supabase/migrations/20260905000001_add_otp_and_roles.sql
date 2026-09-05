@@ -3,20 +3,27 @@
 -- MIGRATION: OTP Verifications, Role Allowlists, and Seed Admin
 -- ====================================================================
 
--- 1. OTP VERIFICATIONS TABLE (Service-Role Only)
-CREATE TABLE IF NOT EXISTS public.otp_verifications (
-    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    email TEXT NOT NULL,
-    otp_code VARCHAR(6) NOT NULL,
-    expires_at TIMESTAMPTZ NOT NULL,
-    verified BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
-);
+-- 1. CIT OTP REQUESTS TABLE (Service-Role Only)
+CREATE TABLE IF NOT EXISTS public.cit_otp_requests (
+    id uuid NOT NULL DEFAULT gen_random_uuid (),
+    user_id uuid NULL,
+    email text NOT NULL,
+    otp_hash text NOT NULL,
+    expires_at timestamp with time zone NOT NULL,
+    attempts integer NOT NULL DEFAULT 0,
+    requested_at timestamp with time zone NOT NULL DEFAULT now(),
+    verified_at timestamp with time zone NULL,
+    CONSTRAINT cit_otp_requests_pkey PRIMARY KEY (id),
+    CONSTRAINT cit_otp_requests_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE
+) TABLESPACE pg_default;
 
-CREATE INDEX IF NOT EXISTS idx_otp_verifications_email_expires 
-ON public.otp_verifications (email, expires_at);
+CREATE INDEX IF NOT EXISTS idx_cit_otp_user_email 
+ON public.cit_otp_requests USING btree (user_id, email) TABLESPACE pg_default;
 
-ALTER TABLE public.otp_verifications ENABLE ROW LEVEL SECURITY;
+CREATE INDEX IF NOT EXISTS idx_cit_otp_email_requested 
+ON public.cit_otp_requests USING btree (email, requested_at DESC) TABLESPACE pg_default;
+
+ALTER TABLE public.cit_otp_requests ENABLE ROW LEVEL SECURITY;
 -- By default with RLS enabled and NO policies granted to anon or authenticated,
 -- this table is accessible ONLY via the Supabase Service Role key on the server.
 
