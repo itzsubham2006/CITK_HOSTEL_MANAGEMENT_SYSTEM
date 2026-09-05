@@ -90,13 +90,14 @@ body {
     margin-bottom: 15px;
 }
 
-input {
+input, select, .register-select {
     width: 100%;
     padding: 12px;
     font-size: 13px;
     border: 1px solid #dcdcdc;
     border-radius: 6px;
     outline: none;
+    background-color: #fff;
 }
 
 input::placeholder {
@@ -172,11 +173,11 @@ input::placeholder {
 
 
 .info-panel {
-    width: 260px;
+    width: 290px;
     background-color: #2e7d32;
     color: #ffffff;
     border-radius: 10px;
-    padding: 18px;
+    padding: 20px;
     font-size: 13px;
     margin-left: 30px;
 }
@@ -190,21 +191,27 @@ input::placeholder {
     border: none;
     height: 1px;
     background: rgba(255,255,255,0.3);
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .info-panel ul {
     list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
 .info-panel li {
-    margin-bottom: 8px;
+    margin-bottom: 12px;
     display: flex;
-    gap: 8px;
+    align-items: flex-start;
+    gap: 10px;
+    line-height: 1.45;
 }
 
 .info-panel i {
-    font-size: 13px;
+    font-size: 14px;
+    margin-top: 2px;
+    flex-shrink: 0;
 }
 
 
@@ -216,13 +223,123 @@ input::placeholder {
 
 
 @media (max-width: 768px) {
+    .citklogo {
+        margin-top: 15px;
+    }
+
+    .citklogo img {
+        width: 190px;
+        max-width: 65vw;
+    }
+
     .register-box {
         flex-direction: column;
         align-items: center;
+        margin-top: 16px;
+        gap: 16px;
+        padding: 0 14px 30px;
+    }
+
+    .register2-box {
+        width: 100%;
+        max-width: 350px;
+        padding: 20px 18px;
+        border-radius: 8px;
+    }
+
+    .register2-box h2 {
+        font-size: 17px;
+        margin-bottom: 16px;
+    }
+
+    .input-group {
+        margin-bottom: 11px;
+    }
+
+    input, select, .register-select {
+        padding: 9px 12px;
+        font-size: 13px;
+        border-radius: 5px;
+    }
+
+    .register-btn {
+        padding: 10px;
+        font-size: 13px;
+        margin-top: 6px;
+        border-radius: 5px;
+    }
+
+    .account-link {
+        margin-top: 14px;
+        font-size: 12px;
     }
 
     .info-panel {
-        width: 90%;
+        width: 100%;
+        max-width: 350px;
+        margin-left: 0;
+        padding: 14px 16px;
+        font-size: 11.5px;
+        border-radius: 8px;
+    }
+
+    .info-panel h3 {
+        font-size: 13px;
+        margin-bottom: 6px;
+    }
+
+    .info-panel hr {
+        margin-bottom: 8px;
+    }
+
+    .info-panel li {
+        margin-bottom: 8px;
+        gap: 8px;
+        line-height: 1.35;
+    }
+
+    .info-panel i {
+        font-size: 12px;
+        margin-top: 2px;
+    }
+
+    .info-note {
+        margin-top: 8px;
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 420px) {
+    .citklogo img {
+        width: 160px;
+    }
+
+    .register2-box {
+        padding: 16px 14px;
+    }
+
+    .register2-box h2 {
+        font-size: 15px;
+        margin-bottom: 12px;
+    }
+
+    .input-group {
+        margin-bottom: 9px;
+    }
+
+    input, select, .register-select {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+
+    .register-btn {
+        padding: 9px;
+        font-size: 12.5px;
+    }
+
+    .info-panel {
+        padding: 12px 14px;
+        font-size: 11px;
     }
 }
 

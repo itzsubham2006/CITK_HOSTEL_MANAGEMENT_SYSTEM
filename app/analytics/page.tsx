@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 export default function AnalyticsPage() {
+  const router = useRouter()
   const [complaints, setComplaints] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
@@ -12,6 +14,15 @@ export default function AnalyticsPage() {
     async function loadComplaints() {
       setLoading(true)
       try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser()
+
+        if (!user) {
+          router.push('/login?redirect=/analytics')
+          return
+        }
+
         const { data, error } = await supabase.from('complaints').select('*')
         if (error) throw error
         setComplaints(data || [])
@@ -22,7 +33,7 @@ export default function AnalyticsPage() {
       }
     }
     loadComplaints()
-  }, [])
+  }, [router])
 
   const totalIssues = complaints.length
   const totalUpvotes = complaints.reduce((sum, c) => sum + (c.upvotes || 0), 0)

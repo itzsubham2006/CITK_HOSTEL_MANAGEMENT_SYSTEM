@@ -1,10 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { ComplaintStatus, HostelName } from '@/types/database.types'
 
 export default function AllIssuesPage() {
+  const router = useRouter()
   const [complaints, setComplaints] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [userProfile, setUserProfile] = useState<any>(null)
@@ -18,15 +20,17 @@ export default function AllIssuesPage() {
         data: { user },
       } = await supabase.auth.getUser()
 
-      let currentProfile = null
-      if (user) {
-        const { data: prof } = await supabase.from('profiles').select('*').eq('id', user.id).single()
-        currentProfile = prof
-        setUserProfile(prof)
-
-        const { data: upvotes } = await supabase.from('complaint_upvotes').select('complaint_id').eq('user_id', user.id)
-        setUserUpvotedSet(new Set(upvotes?.map((u) => u.complaint_id) || []))
+      if (!user) {
+        router.push('/login?redirect=/issues')
+        return
       }
+
+      const { data: prof } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+      const currentProfile = prof
+      setUserProfile(prof)
+
+      const { data: upvotes } = await supabase.from('complaint_upvotes').select('complaint_id').eq('user_id', user.id)
+      setUserUpvotedSet(new Set(upvotes?.map((u) => u.complaint_id) || []))
 
       let query = supabase.from('complaints').select('*').order('upvotes', { ascending: false }).order('created_at', { ascending: false })
 

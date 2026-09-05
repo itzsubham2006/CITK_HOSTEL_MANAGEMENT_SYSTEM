@@ -4,6 +4,7 @@ import Header from '@/components/header'
 import Footer from '@/components/footer'
 import BackToTop from '@/components/back-to-top'
 import { createClient } from '@/lib/supabase/server'
+import { HostelName, UserRole } from '@/types/database.types'
 
 export const metadata: Metadata = {
   title: 'CITK HOSTEL MANAGEMENT SYSTEM',
@@ -24,21 +25,48 @@ export default async function RootLayout({
   let notificationCount = 0
 
   if (user) {
-    const { data: userProfile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single()
+    try {
+      const { data: userProfile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .maybeSingle()
 
-    profile = userProfile
+      // If profile exists use it, otherwise synthesize from auth metadata so header knows user is logged in
+      profile = userProfile || {
+        id: user.id,
+        username: user.user_metadata?.username || user.email?.split('@')[0] || 'User',
+        email: user.email || '',
+        role: ((user.user_metadata?.role as UserRole) || 'student') as UserRole,
+        hostel: ((user.user_metadata?.hostel as HostelName) || 'SJ') as HostelName,
+        room_no: user.user_metadata?.room_no || 'N/A',
+        profile_pic_url: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }
 
-    const { count } = await supabase
-      .from('notifications')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .eq('is_read', false)
+      const { count } = await supabase
+        .from('notifications')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('is_read', false)
 
-    notificationCount = count || 0
+      notificationCount = count || 0
+    } catch (err) {
+      console.error('Error loading layout profile:', err)
+      // Fallback object so user can see their logout button
+      profile = {
+        id: user.id,
+        username: user.email?.split('@')[0] || 'User',
+        email: user.email || '',
+        role: 'student' as UserRole,
+        hostel: 'SJ' as HostelName,
+        room_no: 'N/A',
+        profile_pic_url: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }
+    }
   }
 
   return (

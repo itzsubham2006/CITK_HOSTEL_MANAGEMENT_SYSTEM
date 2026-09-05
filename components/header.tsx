@@ -12,9 +12,11 @@ interface HeaderProps {
     username: string
     email: string
     role: UserRole
-    hostel: string
-    room_no: string
+    hostel?: string | null
+    room_no?: string | null
     profile_pic_url: string | null
+    created_at?: string
+    updated_at?: string
   } | null
   notificationCount?: number
 }
@@ -74,9 +76,27 @@ export default function Header({ userProfile, notificationCount = 0 }: HeaderPro
           <div className="top-right">
             {userProfile ? (
               <>
+                {userProfile.role === 'admin' && (
+                  <Link href="/admin/dashboard">
+                    <i className="fa-solid fa-gauge-high"></i>
+                    <span>Dashboard</span>
+                  </Link>
+                )}
+                {userProfile.role === 'warden' && (
+                  <Link href="/warden/dashboard">
+                    <i className="fa-solid fa-gauge-high"></i>
+                    <span>Dashboard</span>
+                  </Link>
+                )}
+                {userProfile.role === 'student' && (
+                  <Link href="/student/dashboard">
+                    <i className="fa-solid fa-gauge-high"></i>
+                    <span>Dashboard</span>
+                  </Link>
+                )}
                 <Link href="/profile">
                   <i className="fa-solid fa-user"></i>
-                  <span>My Profile ({userProfile.username})</span>
+                  <span>Profile ({userProfile.username})</span>
                 </Link>
                 <button
                   onClick={handleLogout}
@@ -92,9 +112,9 @@ export default function Header({ userProfile, notificationCount = 0 }: HeaderPro
                   <i className="fa-solid fa-right-to-bracket"></i>
                   <span>Login</span>
                 </Link>
-                <Link href="/register">
+                <Link href="/signup">
                   <i className="fa-solid fa-user-plus"></i>
-                  <span>Register</span>
+                  <span>Sign Up</span>
                 </Link>
               </>
             )}
@@ -163,13 +183,13 @@ export default function Header({ userProfile, notificationCount = 0 }: HeaderPro
           )}
 
           <li>
-            <Link href="/issues" onClick={() => setMobileMenuOpen(false)}>
+            <Link href={userProfile ? "/issues" : "/login?redirect=/issues"} onClick={() => setMobileMenuOpen(false)}>
               All Issues
             </Link>
           </li>
 
           <li>
-            <Link href="/analytics" onClick={() => setMobileMenuOpen(false)}>
+            <Link href={userProfile ? "/analytics" : "/login?redirect=/analytics"} onClick={() => setMobileMenuOpen(false)}>
               Analytics
             </Link>
           </li>
@@ -245,12 +265,12 @@ export default function Header({ userProfile, notificationCount = 0 }: HeaderPro
                     </a>
                   </li>
                   <li>
-                    <Link href="/hostel-rooms" onClick={() => setMobileMenuOpen(false)}>
+                    <Link href={userProfile ? "/hostel-rooms" : "/login?redirect=/hostel-rooms"} onClick={() => setMobileMenuOpen(false)}>
                       Hostel Rooms
                     </Link>
                   </li>
                   <li>
-                    <Link href="/diaries" onClick={() => setMobileMenuOpen(false)}>
+                    <Link href={userProfile ? "/diaries" : "/login?redirect=/diaries"} onClick={() => setMobileMenuOpen(false)}>
                       Hostel Diaries
                     </Link>
                   </li>
@@ -278,7 +298,7 @@ export default function Header({ userProfile, notificationCount = 0 }: HeaderPro
           </li>
 
           <li>
-            <Link href="/notifications" className="sp-badge-link" onClick={() => setMobileMenuOpen(false)}>
+            <Link href={userProfile ? "/notifications" : "/login?redirect=/notifications"} className="sp-badge-link" onClick={() => setMobileMenuOpen(false)}>
               Notifications {notificationCount > 0 && <span className="sp-badge">{notificationCount}</span>}
             </Link>
           </li>
@@ -290,7 +310,7 @@ export default function Header({ userProfile, notificationCount = 0 }: HeaderPro
           </li>
 
           <li className="nav-item">
-            <Link href="/chatbot" className="nav-link" onClick={() => setMobileMenuOpen(false)}>
+            <Link href={userProfile ? "/chatbot" : "/login?redirect=/chatbot"} className="nav-link" onClick={() => setMobileMenuOpen(false)}>
               Hostel Bot
             </Link>
           </li>

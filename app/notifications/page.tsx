@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 export default function NotificationPage() {
+  const router = useRouter()
   const [notifications, setNotifications] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
@@ -15,7 +17,10 @@ export default function NotificationPage() {
         data: { user },
       } = await supabase.auth.getUser()
 
-      if (!user) return
+      if (!user) {
+        router.push('/login?redirect=/notifications')
+        return
+      }
 
       const { data, error } = await supabase
         .from('notifications')

@@ -28,8 +28,8 @@ export interface Database {
           id: string
           username: string
           email: string
-          hostel: HostelName
-          room_no: string
+          hostel: HostelName | null
+          room_no: string | null
           role: UserRole
           profile_pic_url: string | null
           created_at: string
@@ -39,8 +39,8 @@ export interface Database {
           id: string
           username: string
           email: string
-          hostel?: HostelName
-          room_no?: string
+          hostel?: HostelName | null
+          room_no?: string | null
           role?: UserRole
           profile_pic_url?: string | null
           created_at?: string
@@ -50,8 +50,8 @@ export interface Database {
           id?: string
           username?: string
           email?: string
-          hostel?: HostelName
-          room_no?: string
+          hostel?: HostelName | null
+          room_no?: string | null
           role?: UserRole
           profile_pic_url?: string | null
           created_at?: string
@@ -403,6 +403,91 @@ export interface Database {
           created_at?: string
         }
         Relationships: []
+      }
+      otp_verifications: {
+        Row: {
+          id: number
+          email: string
+          otp_code: string
+          expires_at: string
+          verified: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: number
+          email: string
+          otp_code: string
+          expires_at: string
+          verified?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: number
+          email?: string
+          otp_code?: string
+          expires_at?: string
+          verified?: boolean
+          created_at?: string
+        }
+        Relationships: []
+      }
+      admin_emails: {
+        Row: {
+          id: number
+          email: string
+          added_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: number
+          email: string
+          added_by?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: number
+          email?: string
+          added_by?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_emails_added_by_fkey"
+            columns: ["added_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      warden_emails: {
+        Row: {
+          id: number
+          email: string
+          added_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: number
+          email: string
+          added_by?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: number
+          email?: string
+          added_by?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "warden_emails_added_by_fkey"
+            columns: ["added_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
       }
     }
     Views: {
