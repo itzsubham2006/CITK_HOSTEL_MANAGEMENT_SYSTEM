@@ -1,25 +1,61 @@
-# Virtual environment
-hackvenv/
+# Dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
-# Flask instance folder
+# Next.js Build
+/.next/
+/out/
+/build
+
+# Environment Variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.local.example
+!.env.example
+
+# Local SQLite & Databases
+*.db
+*.sqlite3
 instance/
 
-# Python cache
+# Python & System caches
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+venv/
+env/
 
-# Database
-*.db
+# IDE & OS
+.DS_Store
+*.pem
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
-#images
+# Debug Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
 
+# Vercel
+.vercel
 
-
-#complaint_images
-app/static/complaint_images/
-
-
-
-test.py
-
-.env
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
