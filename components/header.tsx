@@ -58,9 +58,25 @@ export default function Header({ userProfile, notificationCount = 0 }: HeaderPro
     router.refresh()
   }
 
+  const closeAllMenus = () => {
+    setOpenMega(null)
+    setMobileMenuOpen(false)
+  }
+
+  useEffect(() => {
+    if (!mobileMenuOpen) {
+      setOpenMega(null)
+    }
+  }, [mobileMenuOpen])
+
+  useEffect(() => {
+    closeAllMenus()
+  }, [pathname])
+
   const toggleMega = (name: string, e: React.MouseEvent) => {
     e.preventDefault()
-    setOpenMega(openMega === name ? null : name)
+    e.stopPropagation()
+    setOpenMega((prev) => (prev === name ? null : name))
   }
 
   return (
@@ -146,7 +162,13 @@ export default function Header({ userProfile, notificationCount = 0 }: HeaderPro
           <button
             className="mobile-menu-toggle"
             aria-label="Open Menu"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            onClick={() => {
+              if (mobileMenuOpen) {
+                closeAllMenus()
+              } else {
+                setMobileMenuOpen(true)
+              }
+            }}
           >
             <span className="bar" style={{ margin: '2px 0px' }}></span>
             <span className="bar"></span>
@@ -156,13 +178,13 @@ export default function Header({ userProfile, notificationCount = 0 }: HeaderPro
 
         <ul className={`sp-nav-list ${mobileMenuOpen ? 'is-active' : ''}`}>
           <li className="mobile-only close-row">
-            <button className="close-menu" onClick={() => setMobileMenuOpen(false)}>
+            <button className="close-menu" onClick={closeAllMenus}>
               &times; Close
             </button>
           </li>
 
           <li>
-            <Link href="/" onClick={() => setMobileMenuOpen(false)}>
+            <Link href="/" onClick={closeAllMenus}>
               Home
             </Link>
           </li>
@@ -170,12 +192,12 @@ export default function Header({ userProfile, notificationCount = 0 }: HeaderPro
           {userProfile?.role === 'student' && (
             <>
               <li>
-                <Link href="/report-issue" onClick={() => setMobileMenuOpen(false)}>
+                <Link href="/report-issue" onClick={closeAllMenus}>
                   Report Issue
                 </Link>
               </li>
               <li>
-                <Link href="/my-issues" onClick={() => setMobileMenuOpen(false)}>
+                <Link href="/my-issues" onClick={closeAllMenus}>
                   My Reported Issues
                 </Link>
               </li>
@@ -183,20 +205,20 @@ export default function Header({ userProfile, notificationCount = 0 }: HeaderPro
           )}
 
           <li>
-            <Link href={userProfile ? "/issues" : "/login?redirect=/issues"} onClick={() => setMobileMenuOpen(false)}>
+            <Link href={userProfile ? "/issues" : "/login?redirect=/issues"} onClick={closeAllMenus}>
               All Issues
             </Link>
           </li>
 
           <li>
-            <Link href={userProfile ? "/analytics" : "/login?redirect=/analytics"} onClick={() => setMobileMenuOpen(false)}>
+            <Link href={userProfile ? "/analytics" : "/login?redirect=/analytics"} onClick={closeAllMenus}>
               Analytics
             </Link>
           </li>
 
           {(userProfile?.role === 'admin' || userProfile?.role === 'warden') && (
             <li>
-              <Link href="/announcements" onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/announcements" onClick={closeAllMenus}>
                 Announcements
               </Link>
             </li>
@@ -205,30 +227,49 @@ export default function Header({ userProfile, notificationCount = 0 }: HeaderPro
           {/* MEGA MENU: Resources */}
           <li className={`sp-mega-parent ${openMega === 'resources' ? 'is-open active' : ''}`}>
             <a href="#" className="mobile-trigger" onClick={(e) => toggleMega('resources', e)}>
-              Resources ▾
+              Resources {openMega === 'resources' ? '▲' : '▼'}
             </a>
 
             <div className="sp-mega-box">
+              <div className="sp-mega-header-mobile">
+                <span className="sp-mega-title">
+                  <i className="fa-solid fa-compass" style={{ marginRight: '6px' }}></i>
+                  Hostel Resources
+                </span>
+                <button
+                  type="button"
+                  className="sp-mega-close"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setOpenMega(null)
+                  }}
+                  aria-label="Close submenu"
+                >
+                  &times; Close
+                </button>
+              </div>
+
               <div className="sp-mega-left">
                 <h4>Hostel Resources</h4>
                 <ul>
                   <li>
-                    <Link href="/facilities" onClick={() => setMobileMenuOpen(false)}>
-                      Hostel Rules & Facilities
+                    <Link href="/facilities" onClick={closeAllMenus}>
+                      Hostel Rules &amp; Facilities
                     </Link>
                   </li>
                   <li>
-                    <Link href="/schedules" onClick={() => setMobileMenuOpen(false)}>
+                    <Link href="/schedules" onClick={closeAllMenus}>
                       Schedules
                     </Link>
                   </li>
                   <li>
-                    <Link href="/hostel-body" onClick={() => setMobileMenuOpen(false)}>
+                    <Link href="/hostel-body" onClick={closeAllMenus}>
                       Hostel Bodies
                     </Link>
                   </li>
                   <li>
-                    <Link href="/wardens" onClick={() => setMobileMenuOpen(false)}>
+                    <Link href="/wardens" onClick={closeAllMenus}>
                       Hostel Wardens
                     </Link>
                   </li>
@@ -238,10 +279,10 @@ export default function Header({ userProfile, notificationCount = 0 }: HeaderPro
               <div className="sp-mega-right">
                 <h4>Others</h4>
                 <div className="sp-mega-grid">
-                  <Link href="/anti-ragging" onClick={() => setMobileMenuOpen(false)}>
+                  <Link href="/anti-ragging" onClick={closeAllMenus}>
                     Anti Ragging
                   </Link>
-                  <Link href="/announcements" onClick={() => setMobileMenuOpen(false)}>
+                  <Link href="/announcements" onClick={closeAllMenus}>
                     Notices
                   </Link>
                 </div>
@@ -252,25 +293,46 @@ export default function Header({ userProfile, notificationCount = 0 }: HeaderPro
           {/* MEGA MENU: More */}
           <li className={`sp-mega-parent ${openMega === 'more' ? 'is-open active' : ''}`}>
             <a href="#" className="mobile-trigger" onClick={(e) => toggleMega('more', e)}>
-              More▾
+              More {openMega === 'more' ? '▲' : '▼'}
             </a>
 
             <div className="sp-mega-box">
+              <div className="sp-mega-header-mobile">
+                <span className="sp-mega-title">
+                  <i className="fa-solid fa-layer-group" style={{ marginRight: '6px' }}></i>
+                  More Options
+                </span>
+                <button
+                  type="button"
+                  className="sp-mega-close"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setOpenMega(null)
+                  }}
+                  aria-label="Close submenu"
+                >
+                  &times; Close
+                </button>
+              </div>
+
               <div className="sp-mega-left">
                 <h4>Important</h4>
                 <ul>
                   <li>
-                    <a href="https://cit.ac.in/pages-uploads-academic-form" target="_blank" rel="noopener noreferrer">
+                    <a href="https://cit.ac.in/pages-uploads-academic-form" target="_blank" rel="noopener noreferrer" onClick={closeAllMenus}>
                       Forms
                     </a>
                   </li>
+                  {(userProfile?.role === 'admin' || userProfile?.role === 'warden') && (
+                    <li>
+                      <Link href="/hostel-rooms" onClick={closeAllMenus}>
+                        Hostel Rooms
+                      </Link>
+                    </li>
+                  )}
                   <li>
-                    <Link href={userProfile ? "/hostel-rooms" : "/login?redirect=/hostel-rooms"} onClick={() => setMobileMenuOpen(false)}>
-                      Hostel Rooms
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href={userProfile ? "/diaries" : "/login?redirect=/diaries"} onClick={() => setMobileMenuOpen(false)}>
+                    <Link href={userProfile ? "/diaries" : "/login?redirect=/diaries"} onClick={closeAllMenus}>
                       Hostel Diaries
                     </Link>
                   </li>
@@ -280,16 +342,16 @@ export default function Header({ userProfile, notificationCount = 0 }: HeaderPro
               <div className="sp-mega-right">
                 <h4>Others</h4>
                 <div className="sp-mega-grid">
-                  <Link href="/organizational-structure" onClick={() => setMobileMenuOpen(false)}>
+                  <Link href="/organizational-structure" onClick={closeAllMenus}>
                     Organizational Structure
                   </Link>
-                  <Link href="/facilities" onClick={() => setMobileMenuOpen(false)}>
+                  <Link href="/facilities" onClick={closeAllMenus}>
                     Hostel Facility
                   </Link>
-                  <Link href="/help" onClick={() => setMobileMenuOpen(false)}>
+                  <Link href="/help" onClick={closeAllMenus}>
                     Help
                   </Link>
-                  <Link href="/feedback" onClick={() => setMobileMenuOpen(false)}>
+                  <Link href="/feedback" onClick={closeAllMenus}>
                     Send Feedback
                   </Link>
                 </div>
@@ -298,19 +360,19 @@ export default function Header({ userProfile, notificationCount = 0 }: HeaderPro
           </li>
 
           <li>
-            <Link href={userProfile ? "/notifications" : "/login?redirect=/notifications"} className="sp-badge-link" onClick={() => setMobileMenuOpen(false)}>
+            <Link href={userProfile ? "/notifications" : "/login?redirect=/notifications"} className="sp-badge-link" onClick={closeAllMenus}>
               Notifications {notificationCount > 0 && <span className="sp-badge">{notificationCount}</span>}
             </Link>
           </li>
 
           <li>
-            <Link href="/about" onClick={() => setMobileMenuOpen(false)}>
+            <Link href="/about" onClick={closeAllMenus}>
               About
             </Link>
           </li>
 
           <li className="nav-item">
-            <Link href={userProfile ? "/chatbot" : "/login?redirect=/chatbot"} className="nav-link" onClick={() => setMobileMenuOpen(false)}>
+            <Link href={userProfile ? "/chatbot" : "/login?redirect=/chatbot"} className="nav-link" onClick={closeAllMenus}>
               Hostel Bot
             </Link>
           </li>

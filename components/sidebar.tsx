@@ -73,7 +73,7 @@ export default function Sidebar({ role = 'student' }: SidebarProps) {
           name: 'Hostel Rooms Map',
           href: '/hostel-rooms',
           icon: Grid,
-          roles: ['student', 'admin', 'warden'],
+          roles: ['admin', 'warden'],
         },
         {
           name: 'Analytics',

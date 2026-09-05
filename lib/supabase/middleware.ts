@@ -137,5 +137,26 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
+  // 5. Server-side role check for hostel-rooms and hostel-selector (warden and admin only)
+  if (
+    user &&
+    (path === '/hostel-rooms' ||
+      path.startsWith('/hostel-rooms/') ||
+      path === '/hostel-selector' ||
+      path.startsWith('/hostel-selector/'))
+  ) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .maybeSingle()
+
+    if (profile?.role !== 'warden' && profile?.role !== 'admin') {
+      const url = request.nextUrl.clone()
+      url.pathname = '/student/dashboard'
+      return NextResponse.redirect(url)
+    }
+  }
+
   return supabaseResponse
 }
