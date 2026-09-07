@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { Trash2, Calendar, MapPin, CheckCircle2, Clock, AlertTriangle, Image as ImageIcon } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
 import UpvoteButton from './upvote-button'
@@ -186,9 +187,8 @@ export default function ComplaintCard({
                 className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
                 onClick={() => setShowImageModal(false)}
               >
-                <div className="relative max-w-2xl max-h-[90vh] overflow-auto bg-white rounded-xl p-2 dark:bg-zinc-900" onClick={(e) => e.stopPropagation()}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={complaint.image_url} alt="Attached issue photo" className="rounded-lg object-contain max-h-[80vh] w-full" />
+                <div className="relative max-w-2xl h-[80vh] w-full overflow-hidden bg-white rounded-xl p-2 dark:bg-zinc-900" onClick={(e) => e.stopPropagation()}>
+                  <Image src={complaint.image_url} alt="Attached issue photo" className="rounded-lg object-contain max-h-[80vh] w-full" fill sizes="(max-width: 768px) 100vw, 80vw" style={{ objectFit: 'contain' }} />
                   <button
                     onClick={() => setShowImageModal(false)}
                     className="absolute top-4 right-4 rounded-full bg-black/60 px-3 py-1 text-xs text-white hover:bg-black"

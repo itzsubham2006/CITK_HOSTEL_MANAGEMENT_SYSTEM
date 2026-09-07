@@ -1,12 +1,12 @@
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function Footer() {
   return (
     <footer className="citk-footer">
       <div className="footer-container">
         <div className="footer-about">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/citk_logo.png" alt="CITK Logo" />
+          <Image src="/images/citk_logo.png" alt="CITK Logo" width={120} height={120} style={{ width: 'auto', height: 'auto' }} />
           <h3>Central Institute of Technology</h3>
           <p>Kokrajhar - 783370, Assam, India</p>
           <p className="email">📧 citkhostel@cit.ac.in</p>

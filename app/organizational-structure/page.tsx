@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 export const metadata = {
   title: 'CITK HOSTEL MANAGEMENT SYSTEM | Organization Structure',
 }
@@ -10,7 +12,7 @@ export default function OrganizationalStructurePage() {
       </div>
 
       <div className="structure_img">
-        <img src="/images/structure.png" alt="structure" />
+        <Image src="/images/structure.png" alt="structure" width={1200} height={800} sizes="100vw" />
       </div>
     </div>
   )

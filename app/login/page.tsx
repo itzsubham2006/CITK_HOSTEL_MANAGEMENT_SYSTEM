@@ -4,6 +4,7 @@ import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import Image from 'next/image'
 
 function LoginContent() {
   const router = useRouter()
@@ -76,8 +77,7 @@ function LoginContent() {
   return (
     <div className="register-main">
       <div className="citklogo">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/images/cit-logoo.png" alt="CIT Logo" />
+        <Image src="/images/cit-logoo.png" alt="CIT Logo" width={120} height={120} style={{ width: 'auto', height: 'auto' }} />
       </div>
 
       <div className="register-box">

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { UserRole } from '@/types/database.types'
@@ -216,10 +217,11 @@ export default function Header({ userProfile, notificationCount = 0 }: HeaderPro
       {/* Branding Section */}
       <div className="branding-section">
         <div className="branding-container">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src="/images/citk_logo.png"
             alt="CITK Logo"
+            width={120}
+            height={120}
             className="main-logo"
           />
 

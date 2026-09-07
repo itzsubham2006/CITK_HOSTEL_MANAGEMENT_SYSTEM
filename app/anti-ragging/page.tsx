@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 
 export default function AntiRaggingPage() {
   const [submitted, setSubmitted] = useState(false)
@@ -42,10 +43,10 @@ export default function AntiRaggingPage() {
         <section className="card">
           <h2>Anti-Ragging Awareness</h2>
           <div className="image-grid">
-            <img src="/images/rag_4.webp" alt="Anti Ragging Banner" />
-            <img src="/images/rag_1.webp" alt="UGC Anti Ragging" />
-            <img src="/images/rag_2.webp" alt="Stop Ragging" />
-            <img src="/images/rag_3.webp" alt="Ragging Awareness" />
+            <Image src="/images/rag_4.webp" alt="Anti Ragging Banner" width={400} height={300} sizes="(max-width: 768px) 50vw, 25vw" />
+            <Image src="/images/rag_1.webp" alt="UGC Anti Ragging" width={400} height={300} sizes="(max-width: 768px) 50vw, 25vw" />
+            <Image src="/images/rag_2.webp" alt="Stop Ragging" width={400} height={300} sizes="(max-width: 768px) 50vw, 25vw" />
+            <Image src="/images/rag_3.webp" alt="Ragging Awareness" width={400} height={300} sizes="(max-width: 768px) 50vw, 25vw" />
           </div>
         </section>
 

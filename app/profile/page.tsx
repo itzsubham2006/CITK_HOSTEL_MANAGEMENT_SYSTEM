@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 
 export default function ProfilePage() {
@@ -87,14 +88,13 @@ export default function ProfilePage() {
     <div className="profile-wrapper" style={{ marginBottom: '50px' }}>
       {/* PROFILE HEADER */}
       <div className="profile-header">
-        <div className="profile-pic">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+        <div className="profile-pic" style={{ position: 'relative', width: '150px', height: '150px', overflow: 'hidden', borderRadius: '50%', margin: '0 auto 20px auto' }}>
+          <Image
             src={profile?.profile_pic_url || '/images/default_user.png'}
             alt="Profile Avatar"
-            onError={(e) => {
-              ;(e.target as HTMLImageElement).src = '/images/cit-logoo.png'
-            }}
+            fill
+            sizes="150px"
+            style={{ objectFit: 'cover' }}
           />
 
           <form onSubmit={handleUpdatePic}>
@@ -140,8 +140,9 @@ export default function ProfilePage() {
         ) : (
           diaries.map((diary) => (
             <div className="diary-card" key={diary.id}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={diary.image_url} alt="Hostel memory" />
+              <div style={{ position: 'relative', width: '100%', height: '200px' }}>
+                <Image src={diary.image_url} alt="Hostel memory" fill sizes="(max-width: 768px) 100vw, 30vw" style={{ objectFit: 'cover' }} />
+              </div>
               <p>{diary.caption}</p>
 
               <button

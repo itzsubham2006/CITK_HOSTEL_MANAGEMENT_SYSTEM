@@ -65,13 +65,29 @@ export async function updateSession(request: NextRequest) {
     path === '/warden' ||
     path.startsWith('/warden/')
 
+  // Auth pages where logged-in users should be redirected to their dashboard
+  const isAuthPage =
+    path === '/login' || path === '/signup' || path === '/register'
+
+  // Routes that need role-based access control
+  const isAdminRoute = path === '/admin' || path.startsWith('/admin/')
+  const isWardenRoute = path === '/warden' || path.startsWith('/warden/')
+  const isHostelManagementRoute =
+    path === '/hostel-rooms' ||
+    path.startsWith('/hostel-rooms/') ||
+    path === '/hostel-selector' ||
+    path.startsWith('/hostel-selector/')
+
+  // Does this route actually need a getUser() network call?
+  const needsAuthVerification = isGatedRoute || isAuthPage
+
   // Performance optimization: Check if client has any Supabase auth cookies
   const allCookies = request.cookies.getAll()
   const hasAuthCookie = allCookies.some((c) => c.name.startsWith('sb-'))
 
   // 1. If no auth cookie at all:
   // - For gated routes: redirect to login immediately in ~0ms (no remote network call)
-  // - For public routes: pass through immediately in ~0ms (no remote network call)
+  // - For public routes (including auth pages): pass through immediately in ~0ms
   if (!hasAuthCookie) {
     if (isGatedRoute) {
       const url = request.nextUrl.clone()
@@ -82,6 +98,13 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse
   }
 
+  // 2. Has auth cookie but visiting a public, non-auth route (e.g. /, /about, /facilities)
+  // Skip getUser() entirely — no network call needed (~0ms)
+  if (!needsAuthVerification) {
+    return supabaseResponse
+  }
+
+  // 3. Route needs auth verification — call getUser() once (single network round-trip)
   let user = null
   try {
     const { data } = await supabase.auth.getUser()
@@ -99,21 +122,34 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Fast helper to get role from user_metadata before falling back to remote DB query
+  // If no valid user and on an auth page, just let them through to the login/signup form
+  if (!user) {
+    return supabaseResponse
+  }
+
+  // --- User is authenticated from here ---
+
+  // Cached role lookup — called at most once per request, reused for all checks
+  let cachedRole: string | null = null
   const getUserRole = async (): Promise<string> => {
+    if (cachedRole !== null) return cachedRole
+    // Fast path: check user_metadata first (no DB query)
     if (user?.user_metadata?.role) {
-      return user.user_metadata.role as string
+      cachedRole = user.user_metadata.role as string
+      return cachedRole
     }
+    // Fallback: query the profiles table (single DB query)
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', user!.id)
       .maybeSingle()
-    return profile?.role || 'student'
+    cachedRole = profile?.role || 'student'
+    return cachedRole
   }
 
-  // 2. If logged in and accessing login or signup: redirect to role-based dashboard or return-to URL
-  if (user && (path === '/login' || path === '/signup' || path === '/register')) {
+  // 4. If logged in and accessing login or signup: redirect to role-based dashboard or return-to URL
+  if (isAuthPage) {
     const role = await getUserRole()
     const redirectUrl = request.nextUrl.clone()
 
@@ -134,8 +170,8 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(redirectUrl)
   }
 
-  // 3. Server-side role check for admin routes (matches /admin and /admin/*, NOT other prefixes)
-  if (user && (path === '/admin' || path.startsWith('/admin/'))) {
+  // 5. Server-side role check for admin routes (matches /admin and /admin/*, NOT other prefixes)
+  if (isAdminRoute) {
     const role = await getUserRole()
 
     if (role !== 'admin') {
@@ -145,8 +181,8 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  // 4. Server-side role check for warden management routes (matches /warden and /warden/*, NOT /wardens)
-  if (user && (path === '/warden' || path.startsWith('/warden/'))) {
+  // 6. Server-side role check for warden management routes (matches /warden and /warden/*, NOT /wardens)
+  if (isWardenRoute) {
     const role = await getUserRole()
 
     if (role !== 'warden' && role !== 'admin') {
@@ -156,14 +192,8 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  // 5. Server-side role check for hostel-rooms and hostel-selector (warden and admin only)
-  if (
-    user &&
-    (path === '/hostel-rooms' ||
-      path.startsWith('/hostel-rooms/') ||
-      path === '/hostel-selector' ||
-      path.startsWith('/hostel-selector/'))
-  ) {
+  // 7. Server-side role check for hostel-rooms and hostel-selector (warden and admin only)
+  if (isHostelManagementRoute) {
     const role = await getUserRole()
 
     if (role !== 'admin' && role !== 'warden') {

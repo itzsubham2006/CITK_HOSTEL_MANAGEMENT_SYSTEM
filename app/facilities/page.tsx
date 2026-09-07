@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 
+import Image from 'next/image'
+
 export default function FacilitiesPage() {
   const [counts, setCounts] = useState({ hostels: 0, boys: 0, girls: 0, capacity: 0 })
 
@@ -39,14 +41,14 @@ export default function FacilitiesPage() {
 
         <div className="slider">
           <div className="slides">
-            <img src="/images/hostel.jpg" alt="Hostel" />
-            <img src="/images/hostel2.jpeg" alt="Hostel 2" />
-            <img src="/images/snm_hostel.webp" alt="SNM Hostel" />
-            <img src="/images/bg-3.jpg" alt="Campus BG" />
-            <img src="/images/bj.jpg" alt="BJ Hostel" />
-            <img src="/images/snm_hostel.webp" alt="SNM Hostel" />
-            <img src="/images/hostel2.jpeg" alt="Hostel 2" />
-            <img src="/images/hostel3.jpeg" alt="Hostel 3" />
+            <Image src="/images/hostel.jpg" alt="Hostel" width={800} height={600} sizes="100vw" />
+            <Image src="/images/hostel2.jpeg" alt="Hostel 2" width={800} height={600} sizes="100vw" />
+            <Image src="/images/snm_hostel.webp" alt="SNM Hostel" width={800} height={600} sizes="100vw" />
+            <Image src="/images/bg-3.jpg" alt="Campus BG" width={800} height={600} sizes="100vw" />
+            <Image src="/images/bj.jpg" alt="BJ Hostel" width={800} height={600} sizes="100vw" />
+            <Image src="/images/snm_hostel.webp" alt="SNM Hostel" width={800} height={600} sizes="100vw" />
+            <Image src="/images/hostel2.jpeg" alt="Hostel 2" width={800} height={600} sizes="100vw" />
+            <Image src="/images/hostel3.jpeg" alt="Hostel 3" width={800} height={600} sizes="100vw" />
           </div>
         </div>
       </section>

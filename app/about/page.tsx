@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 
 export const metadata = {
   title: 'CITK HOSTEL MANAGEMENT SYSTEM | About',
@@ -8,7 +9,7 @@ export default function AboutPage() {
   return (
     <div className="hehe">
       <div className="about_img">
-        <img src="/images/bg-3.jpg" alt="CIT Kokrajhar Campus" />
+        <Image src="/images/bg-3.jpg" alt="CIT Kokrajhar Campus" width={1200} height={800} sizes="100vw" />
       </div>
 
       <section className="about-wrapper" id="about_wrap">
@@ -34,7 +35,7 @@ export default function AboutPage() {
       </section>
 
       <div id="foto_2">
-        <img src="/images/hostel2.jpeg" alt="hostel_image" />
+        <Image src="/images/hostel2.jpeg" alt="hostel_image" width={1200} height={800} sizes="100vw" />
       </div>
 
       <section className="about-wrapper" id="about_wrap">
@@ -69,7 +70,7 @@ export default function AboutPage() {
         {/* Gambari Girls Hostel */}
         <div className="citk-hostel-card">
           <div className="citk-hostel-image">
-            <img src="/images/gambari_hostel.jpeg" alt="Gambari Girls Hostel" />
+            <Image src="/images/gambari_hostel.jpeg" alt="Gambari Girls Hostel" width={800} height={600} sizes="(max-width: 768px) 100vw, 50vw" />
           </div>
           <div className="citk-hostel-content">
             <h2>Gambari Sikwla (GS) Girls Hostel</h2>
@@ -86,7 +87,7 @@ export default function AboutPage() {
         {/* Baokhungri Hostel */}
         <div className="citk-hostel-card citk-reverse">
           <div className="citk-hostel-image">
-            <img src="/images/test.webp" alt="Baokhungri Girls Hostel" />
+            <Image src="/images/test.webp" alt="Baokhungri Girls Hostel" width={800} height={600} sizes="(max-width: 768px) 100vw, 50vw" />
           </div>
           <div className="citk-hostel-content">
             <h2>Baokhungri Girls Hostel</h2>
@@ -102,7 +103,7 @@ export default function AboutPage() {
         {/* Basiram Jhwlao Boys Hostel */}
         <div className="citk-hostel-card">
           <div className="citk-hostel-image">
-            <img src="/images/bj.jpg" alt="Basiram Jhwlao Hostel" />
+            <Image src="/images/bj.jpg" alt="Basiram Jhwlao Hostel" width={800} height={600} sizes="(max-width: 768px) 100vw, 50vw" />
           </div>
           <div className="citk-hostel-content">
             <h2>Basiram Jhwlao (BJ) Boys Hostel</h2>
@@ -118,7 +119,7 @@ export default function AboutPage() {
         {/* Sikhna Jhwlao Boys Hostel */}
         <div className="citk-hostel-card citk-reverse">
           <div className="citk-hostel-image">
-            <img src="/images/hostel.jpg" alt="Sikhna Jhwlao Hostel" />
+            <Image src="/images/hostel.jpg" alt="Sikhna Jhwlao Hostel" width={800} height={600} sizes="(max-width: 768px) 100vw, 50vw" />
           </div>
           <div className="citk-hostel-content">
             <h2>Sikhna Jhwlao (SJ) Boys Hostel</h2>
@@ -134,7 +135,7 @@ export default function AboutPage() {
         {/* Sujit Narzary Boys Hostel */}
         <div className="citk-hostel-card">
           <div className="citk-hostel-image">
-            <img src="/images/snm_hostel.webp" alt="Sujit Narzary Hostel" />
+            <Image src="/images/snm_hostel.webp" alt="Sujit Narzary Hostel" width={800} height={600} sizes="(max-width: 768px) 100vw, 50vw" />
           </div>
           <div className="citk-hostel-content">
             <h2>Sujit Narzary (SNM) Boys Hostel</h2>
@@ -150,7 +151,7 @@ export default function AboutPage() {
         {/* JD Boys Hostel */}
         <div className="citk-hostel-card citk-reverse">
           <div className="citk-hostel-image">
-            <img src="/images/hostel2.jpeg" alt="JD Boys Hostel" />
+            <Image src="/images/hostel2.jpeg" alt="JD Boys Hostel" width={800} height={600} sizes="(max-width: 768px) 100vw, 50vw" />
           </div>
           <div className="citk-hostel-content">
             <h2>Jwhla dwimalu (JD) Boys Hostel</h2>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 
 export default function HostelDiariesPage() {
@@ -196,14 +197,17 @@ export default function HostelDiariesPage() {
 
             return (
               <div className="diary-card" key={diary.id}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={diary.image_url}
-                  alt="Hostel Memory"
-                  className="diary-image"
-                  onClick={() => setSelectedImage(diary.image_url)}
-                  style={{ cursor: 'pointer' }}
-                />
+                <div style={{ position: 'relative', width: '100%', height: '200px' }}>
+                  <Image
+                    src={diary.image_url}
+                    alt="Hostel Memory"
+                    className="diary-image"
+                    onClick={() => setSelectedImage(diary.image_url)}
+                    style={{ cursor: 'pointer', objectFit: 'cover' }}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 30vw"
+                  />
+                </div>
 
                 <p className="caption">{diary.caption}</p>
 

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { ComplaintStatus, HostelName } from '@/types/database.types'
 
@@ -147,8 +148,9 @@ export default function AllIssuesPage() {
                   <p className="issue-row-desc">{c.description}</p>
 
                   {c.image_url && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={c.image_url} alt="Issue evidence" className="issue-row-image" />
+                    <div style={{ position: 'relative', width: '100px', height: '100px' }}>
+                      <Image src={c.image_url} alt="Issue evidence" className="issue-row-image" fill sizes="100px" style={{ objectFit: 'cover' }} />
+                    </div>
                   )}
 
                   <div className="issue-row-time">

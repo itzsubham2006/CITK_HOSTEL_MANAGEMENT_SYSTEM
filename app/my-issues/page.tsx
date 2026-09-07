@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 
 export default function MyIssuesPage() {
@@ -113,12 +114,13 @@ export default function MyIssuesPage() {
                     {complaint.image_url && (
                       <>
                         <br />
-                        <a href={complaint.image_url} target="_blank" rel="noopener noreferrer">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
+                        <a href={complaint.image_url} target="_blank" rel="noopener noreferrer" style={{ position: 'relative', display: 'block', width: '150px', height: '150px', marginTop: '8px' }}>
+                          <Image
                             src={complaint.image_url}
                             alt="Issue attachment"
-                            style={{ maxWidth: '150px', marginTop: '8px', cursor: 'pointer', borderRadius: '6px' }}
+                            fill
+                            sizes="150px"
+                            style={{ objectFit: 'contain', cursor: 'pointer', borderRadius: '6px' }}
                           />
                         </a>
                       </>

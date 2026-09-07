@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function HomePage() {
   return (
@@ -8,18 +9,12 @@ export default function HomePage() {
         <div className="collage-track">
           {[1, 2, 3].map((track) => (
             <div className="collage" key={track}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/bg-2.jpg" alt="Hostel Campus" />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/gal-1.jpg" alt="Hostel Activity 1" />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/gal-2.jpg" alt="Hostel Activity 2" />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/gal-3.jpg" alt="Hostel Activity 3" />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/gal-4.jpg" alt="Hostel Activity 4" />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/gal-5.jpg" alt="Hostel Activity 5" />
+              <Image src="/images/bg-2.jpg" alt="Hostel Campus" width={800} height={600} sizes="300px" />
+              <Image src="/images/gal-1.jpg" alt="Hostel Activity 1" width={800} height={600} sizes="300px" />
+              <Image src="/images/gal-2.jpg" alt="Hostel Activity 2" width={800} height={600} sizes="300px" />
+              <Image src="/images/gal-3.jpg" alt="Hostel Activity 3" width={800} height={600} sizes="300px" />
+              <Image src="/images/gal-4.jpg" alt="Hostel Activity 4" width={800} height={600} sizes="300px" />
+              <Image src="/images/gal-5.jpg" alt="Hostel Activity 5" width={800} height={600} sizes="300px" />
             </div>
           ))}
         </div>
@@ -37,8 +32,7 @@ export default function HomePage() {
         </main>
 
         <div className="foto">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/cit.jpg" alt="CIT Kokrajhar Campus" />
+          <Image src="/images/cit.jpg" alt="CIT Kokrajhar Campus" width={1200} height={800} sizes="100vw" />
         </div>
       </div>
 
