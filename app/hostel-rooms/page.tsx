@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { HostelName, UserRole } from '@/types/database.types'
+import PageLoader from '@/components/page-loader'
 
 const hostels: HostelName[] = ['SJ', 'JD', 'BJ', 'SNM', 'Bakhungri', 'Gambari']
 const CAPACITY = 2
@@ -230,6 +231,10 @@ function HostelRoomsContent() {
         </Link>
       </div>
     )
+  }
+
+  if (loading) {
+    return <PageLoader />
   }
 
   return (
@@ -590,12 +595,7 @@ function HostelRoomsContent() {
       </div>
 
       {/* Room Layout per Floor */}
-      {loading ? (
-        <div style={{ textAlign: 'center', padding: '50px', color: '#666', background: '#fff', borderRadius: '10px' }}>
-          <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '28px', color: '#2e7d32', marginBottom: '12px' }}></i>
-          <p>Loading {selectedHostel} room allocation map...</p>
-        </div>
-      ) : displayedFloors.length === 0 || displayedFloors.every((f) => f.rooms.length === 0) ? (
+      {displayedFloors.length === 0 || displayedFloors.every((f) => f.rooms.length === 0) ? (
         <div style={{ textAlign: 'center', padding: '50px', color: '#666', background: '#fff', borderRadius: '10px' }}>
           <i className="fa-solid fa-building-circle-xmark" style={{ fontSize: '32px', color: '#888', marginBottom: '10px' }}></i>
           <p>No rooms match your filter criteria.</p>
@@ -980,14 +980,7 @@ function HostelRoomsContent() {
 
 export default function HostelRoomsPage() {
   return (
-    <Suspense
-      fallback={
-        <div style={{ textAlign: 'center', padding: '60px 20px', color: '#666' }}>
-          <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '28px', color: '#2e7d32', marginBottom: '12px' }}></i>
-          <p>Loading hostel room management portal...</p>
-        </div>
-      }
-    >
+    <Suspense fallback={<PageLoader />}>
       <HostelRoomsContent />
     </Suspense>
   )

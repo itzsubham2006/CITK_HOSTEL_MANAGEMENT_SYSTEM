@@ -1,8 +1,10 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import './globals.css'
 import Header from '@/components/header'
 import Footer from '@/components/footer'
 import BackToTop from '@/components/back-to-top'
+import RouteLoader from '@/components/route-loader'
 import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { HostelName, UserRole } from '@/types/database.types'
@@ -79,6 +81,9 @@ export default async function RootLayout({
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
       </head>
       <body>
+        <Suspense fallback={null}>
+          <RouteLoader />
+        </Suspense>
         <Header userProfile={profile} notificationCount={notificationCount} />
         <main>{children}</main>
         <BackToTop />

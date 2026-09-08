@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
+import PageLoader from '@/components/page-loader'
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<any>(null)
@@ -82,6 +83,10 @@ export default function ProfilePage() {
     } catch (err) {
       console.error('Delete diary error:', err)
     }
+  }
+
+  if (loading) {
+    return <PageLoader />
   }
 
   return (

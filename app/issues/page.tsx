@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { ComplaintStatus, HostelName } from '@/types/database.types'
+import PageLoader from '@/components/page-loader'
 
 export default function AllIssuesPage() {
   const router = useRouter()
@@ -89,15 +90,17 @@ export default function AllIssuesPage() {
 
   const hostelLabel = userProfile?.role === 'admin' ? 'All Hostels' : userProfile?.hostel || 'Hostel'
 
+  if (loading) {
+    return <PageLoader />
+  }
+
   return (
     <div className="issues-page-wrapper" style={{ marginBottom: '50px' }}>
       <h2 className="issues-page-title">
         All Issues – {hostelLabel}
       </h2>
 
-      {loading ? (
-        <p style={{ textAlign: 'center', marginTop: '30px', color: '#666' }}>Loading issues...</p>
-      ) : complaints.length === 0 ? (
+      {complaints.length === 0 ? (
         <p style={{ textAlign: 'center', marginTop: '30px', color: '#666' }}>No issues reported in {hostelLabel}.</p>
       ) : (
         <div className="issues-vertical-list">

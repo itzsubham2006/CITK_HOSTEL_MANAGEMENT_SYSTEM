@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import PageLoader from '@/components/page-loader'
 
 interface Message {
   text: string
@@ -15,13 +16,18 @@ export default function ChatbotPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [authLoading, setAuthLoading] = useState(true)
   const chatEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) {
         router.push('/login?redirect=/chatbot')
+      } else {
+        setAuthLoading(false)
       }
+    }).catch(() => {
+      setAuthLoading(false)
     })
   }, [router, supabase])
 
@@ -58,6 +64,10 @@ export default function ChatbotPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (authLoading) {
+    return <PageLoader />
   }
 
   return (

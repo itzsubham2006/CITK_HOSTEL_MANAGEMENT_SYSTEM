@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import Image from 'next/image'
+import PageLoader from '@/components/page-loader'
 
 function LoginContent() {
   const router = useRouter()
@@ -147,7 +148,7 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div style={{ textAlign: 'center', padding: '50px' }}>Loading...</div>}>
+    <Suspense fallback={<PageLoader />}>
       <LoginContent />
     </Suspense>
   )

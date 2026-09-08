@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { HostelName } from '@/types/database.types'
+import PageLoader from '@/components/page-loader'
 
 export default function AnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<any[]>([])
@@ -135,6 +136,10 @@ export default function AnnouncementsPage() {
     }
   }
 
+  if (loading) {
+    return <PageLoader />
+  }
+
   return (
     <div className="announcement-wrapper">
       {/* Create Announcement (Admin only) */}
@@ -191,9 +196,7 @@ export default function AnnouncementsPage() {
       <div className="previous-section">
         <h3>📜 Announcements</h3>
 
-        {loading ? (
-          <p className="empty-text">Loading notices...</p>
-        ) : announcements.length === 0 ? (
+        {announcements.length === 0 ? (
           <p className="empty-text">No announcements yet.</p>
         ) : (
           announcements.map((a) => {

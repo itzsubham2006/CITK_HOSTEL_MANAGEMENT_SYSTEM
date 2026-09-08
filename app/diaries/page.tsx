@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
+import PageLoader from '@/components/page-loader'
 
 export default function HostelDiariesPage() {
   const [diaries, setDiaries] = useState<any[]>([])
@@ -156,6 +157,10 @@ export default function HostelDiariesPage() {
     }
   }
 
+  if (loading) {
+    return <PageLoader />
+  }
+
   return (
     <div className="diary-page">
       <h2 className="page-title">Hostel Diaries</h2>
@@ -185,9 +190,7 @@ export default function HostelDiariesPage() {
       </div>
 
       {/* Diary Grid */}
-      {loading ? (
-        <p style={{ textAlign: 'center', marginTop: '30px', color: '#666' }}>Loading memories...</p>
-      ) : diaries.length === 0 ? (
+      {diaries.length === 0 ? (
         <p style={{ textAlign: 'center', marginTop: '30px', color: '#666' }}>No hostel memories uploaded yet. Be the first!</p>
       ) : (
         <div className="diary-grid">

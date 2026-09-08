@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { HostelName } from '@/types/database.types'
 import Image from 'next/image'
+import PageLoader from '@/components/page-loader'
 
 const hostels: HostelName[] = ['SNM', 'SJ', 'JD', 'BJ', 'Bakhungri', 'Gambari']
 
@@ -402,7 +403,7 @@ function SignupContent() {
 
 export default function SignupPage() {
   return (
-    <Suspense fallback={<div style={{ textAlign: 'center', padding: '50px' }}>Loading...</div>}>
+    <Suspense fallback={<PageLoader />}>
       <SignupContent />
     </Suspense>
   )

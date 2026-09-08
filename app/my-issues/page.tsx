@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
+import PageLoader from '@/components/page-loader'
 
 export default function MyIssuesPage() {
   const [complaints, setComplaints] = useState<any[]>([])
@@ -50,15 +51,17 @@ export default function MyIssuesPage() {
     }
   }
 
+  if (loading) {
+    return <PageLoader />
+  }
+
   return (
     <div className="container small_container1" style={{ margin: '40px auto 100px auto', maxWidth: '1000px', padding: '0 15px' }}>
       <h2 style={{ color: '#2e7d32', borderBottom: '2px solid #2e7d32', paddingBottom: '10px' }}>
         My Reported Issues
       </h2>
 
-      {loading ? (
-        <p style={{ marginTop: '20px', color: '#666' }}>Loading your issues...</p>
-      ) : complaints.length === 0 ? (
+      {complaints.length === 0 ? (
         <div style={{ marginTop: '30px', background: 'white', padding: '30px', borderRadius: '8px', textAlign: 'center', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
           <p style={{ color: '#555', fontSize: '15px' }}>You haven&apos;t reported any issues yet.</p>
           <Link

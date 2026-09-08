@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import PageLoader from '@/components/page-loader'
 
 export default function AnalyticsPage() {
   const router = useRouter()
@@ -50,6 +51,10 @@ export default function AnalyticsPage() {
   const topIssues = [...complaints]
     .sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0))
     .slice(0, 5)
+
+  if (loading) {
+    return <PageLoader />
+  }
 
   return (
     <div className="analytics-wrapper" style={{ marginBottom: '50px' }}>

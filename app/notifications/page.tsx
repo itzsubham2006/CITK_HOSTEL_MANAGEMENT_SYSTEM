@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import PageLoader from '@/components/page-loader'
 
 type NotificationCategory = 'all' | 'unread' | 'announcements' | 'issues'
 
@@ -256,6 +257,10 @@ export default function NotificationPage() {
     return notifications
   }, [notifications, activeTab])
 
+  if (loading) {
+    return <PageLoader />
+  }
+
   return (
     <div className="notification-section">
       {/* Header Row */}
@@ -365,11 +370,7 @@ export default function NotificationPage() {
 
       {/* Notification List */}
       <div className="notification-list">
-        {loading ? (
-          <div className="notification-empty-state">
-            <p>Loading your notifications...</p>
-          </div>
-        ) : filteredNotifications.length === 0 ? (
+        {filteredNotifications.length === 0 ? (
           <div className="notification-empty-state">
             <div className="notification-empty-icon">🔔</div>
             <h4>All caught up!</h4>

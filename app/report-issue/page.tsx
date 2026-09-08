@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { ComplaintCategory, HostelName } from '@/types/database.types'
+import PageLoader from '@/components/page-loader'
 
 const categories: ComplaintCategory[] = [
   'Electricity',
@@ -27,27 +28,34 @@ export default function ReportIssuePage() {
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [userProfile, setUserProfile] = useState<any>(null)
+  const [fetchingProfile, setFetchingProfile] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
     async function loadUser() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-      if (user) {
-        const { data } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle()
-        if (data) {
-          setUserProfile(data)
-          if (data.hostel && hostels.includes(data.hostel)) {
-            setHostel(data.hostel)
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser()
+        if (user) {
+          const { data } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle()
+          if (data) {
+            setUserProfile(data)
+            if (data.hostel && hostels.includes(data.hostel)) {
+              setHostel(data.hostel)
+            }
           }
         }
+      } catch (err) {
+        console.error('Failed to load user profile:', err)
+      } finally {
+        setFetchingProfile(false)
       }
     }
     loadUser()
-  }, [])
+  }, [supabase])
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null
@@ -99,6 +107,10 @@ export default function ReportIssuePage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (fetchingProfile) {
+    return <PageLoader />
   }
 
   return (
